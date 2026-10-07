@@ -20,6 +20,11 @@ class Player:
 
         self.color = (60, 120, 220)
 
+    @property
+    def hitbox(self):
+        # Slightly smaller than the sprite, so near-misses don't count
+        return self.rect.inflate(-6, -6)
+
     def move(self, keys, walls, rows, cols):
         dx = 0
         dy = 0
@@ -148,6 +153,15 @@ class Enemy:
         # Used by power pellet
         self.frozen = False
 
+        # True whenever the enemy can't hurt the player
+        # (frozen, or in the grace period right after a freeze)
+        self.harmless = False
+
+    @property
+    def hitbox(self):
+        # Much smaller than the sprite: the enemy has to really touch you
+        return self.rect.inflate(-12, -12)
+
     def update(self, walls, player, rows, cols):
         from game.maze import bfs
 
@@ -186,9 +200,15 @@ class Enemy:
 
     def draw(self, screen):
 
-        # Frozen enemies become blue
+        # Frozen enemies become blue; enemies in the post-freeze grace
+        # period blink light blue/red to show they are still harmless
         if self.frozen:
             color = (100, 180, 255)
+        elif self.harmless:
+            if (pygame.time.get_ticks() // 150) % 2 == 0:
+                color = (150, 190, 240)
+            else:
+                color = self.color
         else:
             color = self.color
 

@@ -47,3 +47,29 @@ def bfs(walls, start, goal, rows, cols):
                     visited.add((nr,nc))
                     queue.append((nr,nc,path+[(dr,dc)]))
     return None
+
+
+def shortest_path(walls, start, goal, rows, cols):
+    """Return the list of cells from start to goal (inclusive) using BFS."""
+    dir_map = {0: (-1, 0), 1: (1, 0), 2: (0, 1), 3: (0, -1)}
+    prev = {start: None}
+    queue = deque([start])
+    while queue:
+        cur = queue.popleft()
+        if cur == goal:
+            break
+        r, c = cur
+        for d, (dr, dc) in dir_map.items():
+            if not walls[r][c][d]:
+                nxt = (r + dr, c + dc)
+                if nxt not in prev and 0 <= nxt[0] < rows and 0 <= nxt[1] < cols:
+                    prev[nxt] = cur
+                    queue.append(nxt)
+    if goal not in prev:
+        return []
+    path = []
+    cur = goal
+    while cur is not None:
+        path.append(cur)
+        cur = prev[cur]
+    return path[::-1]
